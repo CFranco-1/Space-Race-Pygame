@@ -6,4 +6,4 @@ Space Race is a Space Invaders remake where the player controls Superman as they
 - Press SPACE Key to fire heat vision
 
 # Images
-![screenshot](screenshot1.JPG)
+![screenshot](screentshot1.JPG)
