@@ -54,6 +54,9 @@ class Superman(pygame.sprite.Sprite):
         if key[pygame.K_RIGHT] and self.rect.right < screen_width:
             self.rect.x += speed
 
+        # update mask
+            self.mask = pygame.mask.from_surface(self.image)
+
         # record time
         time_now = pygame.time.get_ticks()
 
@@ -80,6 +83,8 @@ class Lasers(pygame.sprite.Sprite):
     def update(self):
         self.rect.y -= 5
         if self.rect.bottom < 0:
+            self.kill()
+        if pygame.sprite.spritecollide(self, alien_group, True):
             self.kill()
 
 # create alien class
@@ -111,6 +116,10 @@ class Alien_Lasers(pygame.sprite.Sprite):
         self.rect.y += 2
         if self.rect.top > screen_height:
             self.kill()
+        if pygame.sprite.spritecollide(self, superman_group, False, pygame.sprite.collide_mask):
+            self.kill()
+            # Superman HP damaged
+            superman.health_remaining -= 1
 
 # sprite groups
 superman_group = pygame.sprite.Group()
