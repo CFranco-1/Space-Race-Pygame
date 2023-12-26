@@ -31,10 +31,14 @@ class Superman(pygame.sprite.Sprite):
         self.rect.center = [x, y]
         self.health_start = health
         self.health_remaining = health
+        self.last_shot = pygame.time.get_ticks()
 
     def update(self):
         # movement speed
         speed = 8
+
+        # cooldown
+        cooldown = 500 # MS
 
         # get key press
         key = pygame.key.get_pressed()
@@ -42,6 +46,15 @@ class Superman(pygame.sprite.Sprite):
             self.rect.x -= speed
         if key[pygame.K_RIGHT] and self.rect.right < screen_width:
             self.rect.x += speed
+
+        # record time
+        time_now = pygame.time.get_ticks()
+
+        # shooting
+        if key[pygame.K_SPACE] and time_now - self.last_shot > cooldown:
+            laser = Lasers(self.rect.centerx, self.rect.top)
+            laser_group.add(laser)
+            self.last_shot = time_now
         
         # draw hp bar
         pygame.draw.rect(screen, red, (self.rect.x, (self.rect.bottom + 10), self.rect.width, 15))
@@ -49,8 +62,22 @@ class Superman(pygame.sprite.Sprite):
             pygame.draw.rect(screen, green, (self.rect.x, (self.rect.bottom + 10), int(self.rect.width * (self.health_remaining / self.health_start)), 15))
 
 
+# create laser class
+class Lasers(pygame.sprite.Sprite):
+    def __init__(self, x, y):
+        pygame.sprite.Sprite.__init__(self)
+        self.image = pygame.image.load("images/laser.png")
+        self.rect = self.image.get_rect()
+        self.rect.center = [x, y]
+
+    def update(self):
+        self.rect.y -= 5
+        if self.rect.bottom < 0:
+            self.kill()
+
 # sprite groups
 superman_group = pygame.sprite.Group()
+laser_group = pygame.sprite.Group()
 
 # player
 superman = Superman(int(screen_width / 2), screen_height - 100, 3)
@@ -73,8 +100,12 @@ while run:
     # update superman
     superman.update()
 
+    # update sprite 
+    laser_group.update()
+
     # draw sprites
     superman_group.draw(screen)
+    laser_group.draw(screen)
 
     pygame.display.update()
 
