@@ -16,6 +16,8 @@ pygame.display.set_caption('Space Race')
 # define game variables
 rows = 5
 cols = 5
+alien_cooldown = 1000 # MS
+last_alien_shot = pygame.time.get_ticks()
 
 # define colors
 red = (255, 0, 0)
@@ -97,11 +99,24 @@ class Aliens(pygame.sprite.Sprite):
             self.move_direction *= -1
             self.move_counter *= self.move_direction
         
+# create alien laser class
+class Alien_Lasers(pygame.sprite.Sprite):
+    def __init__(self, x, y):
+        pygame.sprite.Sprite.__init__(self)
+        self.image = pygame.image.load("images/alien_laser.png")
+        self.rect = self.image.get_rect()
+        self.rect.center = [x, y]
+
+    def update(self):
+        self.rect.y += 2
+        if self.rect.top > screen_height:
+            self.kill()
 
 # sprite groups
 superman_group = pygame.sprite.Group()
 laser_group = pygame.sprite.Group()
 alien_group = pygame.sprite.Group()
+alien_laser_group = pygame.sprite.Group()
 
 # spawn aliens
 def create_aliens():
@@ -125,6 +140,14 @@ while run:
     # draws background
     draw_bg()
 
+    # random alien lasers
+    time_now = pygame.time.get_ticks()
+    if time_now - last_alien_shot > alien_cooldown and len(alien_laser_group) < 5 and len(alien_group) > 0:
+        hostile_alien = random.choice(alien_group.sprites())
+        alien_laser = Alien_Lasers(hostile_alien.rect.centerx, hostile_alien.rect.bottom)
+        alien_laser_group.add(alien_laser)
+        last_alien_shot = time_now
+
     # event handlers
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -136,11 +159,13 @@ while run:
     # update sprite 
     laser_group.update()
     alien_group.update()
+    alien_laser_group.update()
 
     # draw sprites
     superman_group.draw(screen)
     laser_group.draw(screen)
     alien_group.draw(screen)
+    alien_laser_group.draw(screen)
 
     pygame.display.update()
 
